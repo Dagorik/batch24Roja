@@ -1,46 +1,66 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-
+const {Pelicula} = require('./mongooseClient');
+const PORT = 3000
 const app = express();
-//Configurar body parser para aceptar body
+
 app.use(bodyParser.urlencoded({extended:true}))
 app.use(bodyParser.json())
 
-//Petición simple
 app.get('/',(req,res)=>{
-    res.send({message:'peticion get al index'});
+    res.send({message:'index'});
 });
 
-//Petición con params
-app.get('/users/:uid',(req,res)=>{
-    console.log(req.params)
-    const uid = req.params.uid
-    const user = {id:1,name:'Juan',last_name:'Perz',age:30,is_alive:true}
-    if (uid === "1"){
-        res.send(user)
-    }else{
-        res.status(404).send({message:'User not found'})
-    }
+app.post('/api/v1/pelicula',(req,res)=>{
+    const {titulo,ano,descripcion,portadas,genero,director} = req.body
+    const nuevaPelicula = Pelicula({
+        titulo,
+        ano,
+        descripcion,
+        portadas,
+        genero,
+        director
+    });
+    nuevaPelicula.save((err,pelicula)=>{
+        err 
+        ? res.status(409).send(err) 
+        : res.status(201).send(pelicula)
+    })
 });
 
-//Peticion con querys
-app.get('/busqueda',(req,res)=>{
-    const {search,color} = req.query
-    res.send({message:`El ${search} es color ${color}`});
+app.get('/api/v1/pelicula',(req,res)=>{
+    Pelicula.find().exec()
+        .then(peliculas => res.send(peliculas))
+        .catch(err => res.status(409).send(err))
 });
 
-app.post('/user/create',(req,res)=>{
-     console.log(req.body);
-     const {name,last_name} = req.body
-     const newUser = {
-         id:1,
-         name,
-         last_name
-     }
-     res.status(201).send({user:newUser,message:'Nuevo usuario creado'})
+app.get('/api/v1/busqueda/pelicula',(req,res) => {
+    const {q} = req.query;
+    Pelicula.find({ano:q}).exec()
+        .then(peliculas => res.send(peliculas))
+        .catch(err => res.status(409).send(err))
 });
 
+app.put('/api/v1/pelicula/:uid',(req,res)=>{
+    const {uid} = req.params
+    Pelicula.findByIdAndUpdate(uid,{$set:req.body},{new:true}).exec()
+        .then(newPeli => res.send(newPeli))
+        .catch(err => res.send(err))
 
-app.listen(3000,()=>{
-    console.log('Server on port 3000')
+});
+
+app.get('/api/v1/pelicula/:uid',(req,res)=>{
+    const {uid} = req.params
+    Pelicula.findById(uid).exec()
+        .then(pelicula => {
+            pelicula
+            ? res.status(200).send(pelicula)
+            : res.status(404).send({message:'Pelicula no encontrada'})
+        }).catch(err => {
+            res.status(409).send(err)
+        })
+});
+
+app.listen(PORT,()=>{
+    console.log(`Server on port ${PORT}`)
 });
