@@ -6,7 +6,7 @@ const arrayObj = [{id:"1",name:"Tijeras"},{id:"2",name:"Copias"},{id:"3",name:"S
 // }
 
 
-let array2 = arrayObj.map((element,index,arreglo) =>{
+let array2 = arrayObj.map((element,index) =>{
     return element.name
 });
 console.log('Array obj : ', arrayObj)
