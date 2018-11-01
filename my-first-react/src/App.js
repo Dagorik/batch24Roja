@@ -7,22 +7,32 @@ import React, { Component } from 'react';
 import './App.css';
 import Saludo from './Saludo';
 import Despedida from './Despedida';
+import Navbar from './components/Navbar';
+import Card from './components/Card';
+import axios from 'axios';
 class App extends Component {
-
   constructor(props){
     super(props);
     this.state = {
-      word:'Ejemplo'
+      word:'Ejemplo',
+      authores:[],
+      list:[
+        {id:1,title:'Ejemplo 1', description:'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce varius lacinia sagittis. Nam quis lectus leo. In hac habitasse platea.'},
+        {id:2,title:'Ejemplo 2', description:'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec maximus magna nec aliquet placerat. Donec pellentesque purus ac blandit imperdiet.'},
+        {id:3,title:'Ejemplo 3', description:'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec eu ultricies metus. Praesent ac varius augue, quis ullamcorper velit. In.'}
+      ]
     }
   }
 
   componentDidMount(){
     console.log('componentDidMount')
-    setTimeout(()=>{
-      this.setState({
-        word:'Se modifico el estado'
+    axios.get('https://goodreads-devf-aaron.herokuapp.com/api/v1/authors/')
+      .then(response => {
+        this.setState({
+          authores:response.data
+        })
       })
-    },3000)
+      .catch(err => console.log(err))
   }
 
   componentWillMount(){
@@ -33,15 +43,21 @@ class App extends Component {
     return <h3>Subtitulo desde una función</h3>
   }
 
+  renderCards = () => {
+    if (this.state.authores.length === 0){
+      return <h1>Cargando autores...</h1>
+    }else{
+      return this.state.authores.map((element) => <Card name={element.name} bio={element.biography}/>);
+    }
+  }
+
   render() {
-    console.log('render')
     return (
       <div className="App">
-        <h1>Hola desde el componente App</h1>
-        <p>{this.state.word}</p>
-        {this.renderSubtitle()}
-        <Saludo saludin='Que onda'/>
-        <Despedida bye='Sale chido'/>
+      <Navbar/>
+      <div className="p-5 row">
+        {this.renderCards()}
+      </div>
       </div>
     );
   }
