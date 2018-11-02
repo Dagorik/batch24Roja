@@ -10,6 +10,7 @@ import Despedida from './Despedida';
 import Navbar from './components/Navbar';
 import Card from './components/Card';
 import axios from 'axios';
+import CreateMovie from './components/CreateMovie'
 class App extends Component {
   constructor(props){
     super(props);
@@ -26,7 +27,7 @@ class App extends Component {
 
   componentDidMount(){
     console.log('componentDidMount')
-    axios.get('https://goodreads-devf-aaron.herokuapp.com/api/v1/authors/')
+    axios.get('https://rojacinta24.herokuapp.com/api/v1/pelicula')
       .then(response => {
         this.setState({
           authores:response.data
@@ -47,14 +48,17 @@ class App extends Component {
     if (this.state.authores.length === 0){
       return <h1>Cargando autores...</h1>
     }else{
-      return this.state.authores.map((element) => <Card name={element.name} bio={element.biography}/>);
-    }
+      return this.state.authores.map((element) => <Card name={element.titulo} bio={element.descripcion} photo={element.portadas[0]}/>);
+    }  
   }
 
   render() {
     return (
       <div className="App">
       <Navbar/>
+      <div className="p-5">
+        <CreateMovie/>
+      </div>
       <div className="p-5 row">
         {this.renderCards()}
       </div>
